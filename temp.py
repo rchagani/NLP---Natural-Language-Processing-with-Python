@@ -599,12 +599,215 @@ X = np.transpose(X)
 # New model N-Gram Model
 import random
 
+# Sample data
+text = """Global warming or climate change has become a worldwide concern. It is gradually developing into an unprecedented environmental crisis evident in melting glaciers, changing weather patterns, rising sea levels, floods, cyclones and droughts. Global warming implies an increase in the average temperature of the Earth due to entrapment of greenhouse gases in the earth’s atmosphere."""
 
 
+# Order of the grams
+n = 3
+
+# Our N-Grams
+ngrams = {}
+
+# Creating the model
+for i in range(len(text)-n):
+    gram = text[i:i+n] # text[0:3] = Glo
+    if gram not in ngrams.keys():
+        ngrams[gram] = []
+    ngrams[gram].append(text[i+n]) # text[0+3] text[3] = b
+
+# Testing our N-Gram model
+    
+currentGram = text[0:n]
+result = currentGram
+for i in range(100):
+    if currentGram not in ngrams.keys():
+        break
+    possibilities = ngrams[currentGram]
+    nextItem = possibilities[random.randrange(len(possibilities))]
+    result += nextItem
+    currentGram = result[len(result)-n:len(result)]
+
+print(result)
 
 
+# N-Gram model - Predict Character 
+
+import random
+import nltk
+
+# Sample data
+text = """Global warming or climate change has become a worldwide concern. It is gradually developing into an unprecedented environmental crisis evident in melting glaciers, changing weather patterns, rising sea levels, floods, cyclones and droughts. Global warming implies an increase in the average temperature of the Earth due to entrapment of greenhouse gases in the earth’s atmosphere."""
+
+n = 3
+ngrams = {}
+
+words = nltk.word_tokenize(text)
+
+for i in range(len(words)-n):
+    gram = ' '.join(words[i:i+n])
+    if gram not in ngrams.keys():
+        ngrams[gram] = []
+    ngrams[gram].append(words[i+n])
+    
+  
+# Testing our N-Gram model - Predict Character 
+    
+currentGram = ' '.join(words[0:n])
+result = currentGram
+for i in range(100):
+    if currentGram not in ngrams.keys():
+        break
+    possibilities = ngrams[currentGram]
+    nextItem = possibilities[random.randrange(len(possibilities))]
+    result += ' '+nextItem
+    rwords = nltk.word_tokenize(result)
+    currentGram = ' '.join(rwords[len(rwords)-n:len(rwords)])   
 
 
+print(result)   
+    
+    
+ #### New Model####
+# Latent Semantic Analysis   
+    
+# Latent Semantic Analysis using Python
+
+# Importing the Libraries
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+
+# Sample Data
+dataset = ["The amount of polution is increasing day by day",
+           "The concert was just great",
+           "I love to see Gordon Ramsay cook",
+           "Google is introducing a new technology",
+           "AI Robots are examples of great technology present today",
+           "All of us were singing in the concert",
+           "We have launch campaigns to stop pollution and global warming"]
+
+dataset = [line.lower() for line in dataset]
+
+# Creating Tfidf Model
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(dataset)
+
+# Visualizing the Tfidf Model
+print(X[0])
+
+
+# Creating the SVD
+lsa = TruncatedSVD(n_components = 4, n_iter = 100)
+lsa.fit(X)
+
+
+# First Column of V
+row1 = lsa.components_[3]  
+
+# Word Concept Dictionary Creation
+concept_words = {}
+    
+# Visualizing the concepts
+terms = vectorizer.get_feature_names()
+for i,comp in enumerate(lsa.components_):
+    componentTerms = zip(terms,comp)
+    sortedTerms = sorted(componentTerms,key=lambda x:x[1],reverse=True)
+    sortedTerms = sortedTerms[:10]
+    concept_words["Concept "+str(i)] = sortedTerms
+    
+    
+    
+# Sentence Concepts
+for key in concept_words.keys():
+    sentence_scores = []
+    for sentence in dataset:
+        words = nltk.word_tokenize(sentence)
+        score = 0
+        for word in words:
+            for word_with_score in concept_words[key]:
+                if word == word_with_score[0]:
+                    score += word_with_score[1]
+        sentence_scores.append(score)
+    print("\n"+key+":")
+    for sentence_score in sentence_scores:
+        print(sentence_score)    
+    
+    
+
+# Finding synonyms and antonyms of words
+
+# Importing libraries
+from nltk.corpus import wordnet
+
+# Initializing the list of synnonyms and antonyms
+synonyms = []
+antonyms = []
+
+for syn in wordnet.synsets("good"):
+    for s in syn.lemmas():
+        synonyms.append(s.name())
+        for a in s.antonyms():
+            antonyms.append(a.name())
+            
+            
+# Displaying the synonyms and antonyms
+print(set(synonyms))
+print(set(antonyms))
+
+
+# Word Negation Tracking - Strategy 1
+
+import nltk
+
+sentence = "I was not happy with the team's performance"
+
+words = nltk.word_tokenize(sentence)
+
+new_words = []
+
+temp_word = ''
+for word in words:
+    if word == 'not':
+        temp_word = 'not_'
+    elif temp_word == 'not_':
+        word = temp_word + word
+        temp_word = ''
+    if word != 'not':
+        new_words.append(word)
+
+sentence = ' '.join(new_words)
+
+
+# Word Negation Tracking - Strategy 1
+
+import nltk
+from nltk.corpus import wordnet
+
+sentence = "I was not happy with the team's performance"
+
+words = nltk.word_tokenize(sentence)
+
+new_words = []
+
+temp_word = ''
+for word in words:
+    antonyms = []
+    if word == 'not':
+        temp_word = 'not_'
+    elif temp_word == 'not_':
+        for syn in wordnet.synsets(word):
+            for s in syn.lemmas():
+                for a in s.antonyms():
+                    antonyms.append(a.name())
+        if len(antonyms) >= 1:
+            word = antonyms[0]
+        else:
+            word = temp_word + word
+        temp_word = ''
+    if word != 'not':
+        new_words.append(word)
+
+sentence = ' '.join(new_words)
 
 
 
